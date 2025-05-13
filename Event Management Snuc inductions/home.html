@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKIBIDI EVENT MANAGER - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1a2e, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .glow-active {
+            background: linear-gradient(90deg, #00ddeb, #00aacc);
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .event-card {
+            background: rgba(27, 38, 59, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .notification .loading-bar {
+            animation: loading 3s linear forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes loading {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+        #lunch-preference-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <nav class="navbar fixed top-0 left-0 w-full p-4 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-cyan-400">SKIBIDI EVENT MANAGER</h1>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover glow-active">Home</a>
+                <a href="registered_events.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Registered Events</a>
+                <a href="host_event.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Host Event</a>
+                <a href="host_dashboard.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Host Dashboard</a>
+                <a href="index.html" id="login-link" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Login/Signup</a>
+                <a href="#" id="logout-btn" class="text-pink-500 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover hidden" onclick="logout()">Logout</a>
+                <span id="user-info" class="text-gray-300"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-24 p-6">
+        <div class="flex justify-center space-x-4 mb-8 bg-black bg-opacity-30 p-4 rounded-xl backdrop-blur-md">
+            <div>
+                <label for="city-filter" class="text-gray-300 mr-2">City:</label>
+                <select id="city-filter" class="bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <option value="">All Cities</option>
+                    <option value="New York">New York</option>
+                    <option value="Berlin">Berlin</option>
+                    <option value="Tokyo">Tokyo</option>
+                    <option value="London">London</option>
+                    <option value="San Francisco">San Francisco</option>
+                    <option value="Miami">Miami</option>
+                    <option value="Houston">Houston</option>
+                    <option value="Seoul">Seoul</option>
+                </select>
+            </div>
+            <div>
+                <label for="date-filter" class="text-gray-300 mr-2">Date:</label>
+                <input type="date" id="date-filter" class="bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500">
+            </div>
+            <div>
+                <label for="type-filter" class="text-gray-300 mr-2">Type:</label>
+                <select id="type-filter" class="bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <option value="">All Types</option>
+                    <option value="Conference">Conference</option>
+                    <option value="Concert">Concert</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Exhibition">Exhibition</option>
+                    <option value="Hackathon">Hackathon</option>
+                    <option value="Party">Party</option>
+                    <option value="Seminar">Seminar</option>
+                </select>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold text-cyan-400 text-center mb-8">Available Events</h2>
+        <div id="events-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Lunch Preference Popup Overlay -->
+    <div id="lunch-preference-overlay" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-900 p-6 rounded-xl shadow-lg max-w-md w-full">
+            <h3 class="text-xl font-semibold text-cyan-400 mb-4">Lunch Preferences</h3>
+            <p class="text-gray-300 mb-2">Select your lunch preference:</p>
+            <div class="flex space-x-4 mb-4">
+                <label class="flex items-center text-gray-300">
+                    <input type="checkbox" id="vegan-checkbox" class="mr-2">
+                    Vegan
+                </label>
+                <label class="flex items-center text-gray-300">
+                    <input type="checkbox" id="non-vegan-checkbox" class="mr-2">
+                    Non-Vegan
+                </label>
+            </div>
+            <p class="text-gray-300 mb-2">Additional Information (Optional):</p>
+            <textarea id="additional-info-textarea" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 mb-4" placeholder="e.g., allergies, specific requests" rows="3"></textarea>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-lunch-preference" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400 transition-all duration-300">Cancel</button>
+                <button id="submit-lunch-preference" class="px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user')) || { isLoggedIn: false };
+        let currentEventName = null;
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-cyan-500 text-gray-900' : 'bg-pink-500 text-white'}`;
+            notification.innerHTML = `
+                <div class="loading-bar h-1 ${type === 'success' ? 'bg-gray-900' : 'bg-white'} absolute top-0 left-0"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function updateNavbar() {
+            const userInfo = document.getElementById('user-info');
+            const loginLink = document.getElementById('login-link');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (user.isLoggedIn) {
+                userInfo.innerHTML = `Welcome, <span class="text-cyan-400 font-semibold">${user.name}</span>`;
+                loginLink.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userInfo.textContent = '';
+                loginLink.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            user = { isLoggedIn: false };
+            updateNavbar();
+            showNotification('Logged out successfully!');
+        }
+
+        function getEventImage(type) {
+            const safeType = typeof type === 'string' ? type : '';
+            switch (safeType.toLowerCase()) {
+                case 'conference':
+                    return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1470&auto=format&fit=crop';
+                case 'concert':
+                    return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1470&auto=format&fit=crop';
+                case 'workshop':
+                    return 'https://images.unsplash.com/photo-1516321318423-24f50516f4d8?q=80&w=1470&auto=format&fit=crop';
+                case 'exhibition':
+                    return 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1470&auto=format&fit=crop';
+                case 'hackathon':
+                    return 'snuc_ai.jpeg';
+                case 'party':
+                    return 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1470&auto=format&fit=crop';
+                case 'seminar':
+                    return 'https://images.unsplash.com/photo-1505373877841-8d25f7d466b0?q=80&w=1470&auto=format&fit=crop';
+                default:
+                    return 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1469&auto=format&fit=crop';
+            }
+        }
+
+        async function fetchEvents() {
+            const city = document.getElementById('city-filter').value;
+            const date = document.getElementById('date-filter').value;
+            const type = document.getElementById('type-filter').value;
+
+            try {
+                const params = new URLSearchParams();
+                if (city) params.append('location', city);
+                if (date) params.append('date', date);
+                if (type) params.append('type', type);
+
+                const response = await fetch(`http://localhost:5000/get_events?${params.toString()}`);
+                const events = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(events.error || 'Failed to fetch events.');
+                }
+
+                console.log('Fetched events:', events);
+                const eventsArray = Array.isArray(events) ? events : [];
+                displayEvents(eventsArray);
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        function displayEvents(events) {
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+
+            if (!Array.isArray(events) || events.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center col-span-full">No events found.</p>';
+                return;
+            }
+
+            events.forEach(event => {
+                if (!event || typeof event !== 'object') return;
+
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card p-6 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300';
+                eventCard.innerHTML = `
+                    <img src="${event.bannerUrl || getEventImage(event.type || '')}" alt="${event.name || 'Unnamed Event'}" class="w-full h-40 object-cover rounded-lg mb-4" onerror="this.src='https://picsum.photos/300/200?random=fallback';">
+                    <h3 class="text-xl font-semibold text-cyan-400">${event.name || 'Unnamed Event'}</h3>
+                    <p class="text-gray-300"><strong>Location:</strong> ${event.location || 'N/A'}</p>
+                    <p class="text-gray-300"><strong>Date:</strong> ${event.date || 'N/A'}</p>
+                    <p class="text-gray-300"><strong>Time:</strong> ${event.time || 'N/A'}</p>
+                    ${event.type ? `<p class="text-gray-300"><strong>Type:</strong> ${event.type}</p>` : ''}
+                    <p class="text-gray-400 mt-2">${event.description || 'No description available.'}</p>
+                    ${event.hostEmail ? `<p class="text-gray-300"><strong>Hosted by:</strong> ${event.hostEmail}</p>` : ''}
+                    <a href="#" class="inline-block mt-4 px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300" onclick="showLunchPreferencePopup('${event.name || 'Unnamed Event'}'); return false;">Register</a>
+                `;
+                container.appendChild(eventCard);
+            });
+        }
+
+        function showLunchPreferencePopup(eventName) {
+            if (!user.isLoggedIn) {
+                showNotification('Please log in to register for events.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+                return;
+            }
+
+            currentEventName = eventName;
+            const overlay = document.getElementById('lunch-preference-overlay');
+            // Reset the form
+            document.getElementById('vegan-checkbox').checked = false;
+            document.getElementById('non-vegan-checkbox').checked = false;
+            document.getElementById('additional-info-textarea').value = '';
+            overlay.classList.remove('hidden');
+        }
+
+        async function registerEvent(eventName, lunchPreference) {
+            try {
+                const response = await fetch('http://localhost:5000/register_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: user.email,
+                        event_name: eventName,
+                        lunch_preference: lunchPreference
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to register for event.');
+                }
+
+                showNotification(result.message);
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Ensure checkboxes are mutually exclusive
+        const veganCheckbox = document.getElementById('vegan-checkbox');
+        const nonVeganCheckbox = document.getElementById('non-vegan-checkbox');
+
+        veganCheckbox.addEventListener('change', () => {
+            if (veganCheckbox.checked) {
+                nonVeganCheckbox.checked = false;
+            }
+        });
+
+        nonVeganCheckbox.addEventListener('change', () => {
+            if (nonVeganCheckbox.checked) {
+                veganCheckbox.checked = false;
+            }
+        });
+
+        // Popup Event Listeners
+        document.getElementById('submit-lunch-preference').addEventListener('click', () => {
+            const mainPreference = veganCheckbox.checked ? 'Vegan' : nonVeganCheckbox.checked ? 'Non-Vegan' : '';
+            const additionalInfo = document.getElementById('additional-info-textarea').value.trim();
+
+            if (!mainPreference) {
+                showNotification('Please select a lunch preference.', 'error');
+                return;
+            }
+
+            const lunchPreference = {
+                main_preference: mainPreference,
+                additional_info: additionalInfo
+            };
+
+            if (currentEventName) {
+                registerEvent(currentEventName, lunchPreference);
+            }
+            document.getElementById('lunch-preference-overlay').classList.add('hidden');
+            currentEventName = null;
+        });
+
+        document.getElementById('cancel-lunch-preference').addEventListener('click', () => {
+            document.getElementById('lunch-preference-overlay').classList.add('hidden');
+            currentEventName = null;
+        });
+
+        document.getElementById('city-filter').addEventListener('change', fetchEvents);
+        document.getElementById('date-filter').addEventListener('change', fetchEvents);
+        document.getElementById('type-filter').addEventListener('change', fetchEvents);
+
+        updateNavbar();
+        fetchEvents();
+    </script>
+</body>
+</html>

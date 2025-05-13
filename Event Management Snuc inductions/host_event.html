@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKIBIDI EVENT MANAGER - Host Event</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1a2e, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .glow-active {
+            background: linear-gradient(90deg, #00ddeb, #00aacc);
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .form-card {
+            background: rgba(27, 38, 59, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .notification .loading-bar {
+            animation: loading 3s linear forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes loading {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <nav class="navbar fixed top-0 left-0 w-full p-4 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-cyan-400">SKIBIDI EVENT MANAGER</h1>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Home</a>
+                <a href="registered_events.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Registered Events</a>
+                <a href="host_event.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover glow-active">Host Event</a>
+                <a href="index.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Login/Signup</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-24 p-6">
+        <h2 class="text-3xl font-bold text-cyan-400 text-center mb-8">Host a New Event</h2>
+        <div class="form-card max-w-md mx-auto p-6 rounded-xl shadow-lg transition-all duration-300">
+            <div id="host-event-form">
+                <div class="mb-4">
+                    <label for="event-name" class="block text-gray-300 mb-2">Event Name</label>
+                    <input type="text" id="event-name" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter event name" required>
+                    <span id="event-name-error" class="text-pink-500 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label for="event-date" class="block text-gray-300 mb-2">Date</label>
+                    <input type="date" id="event-date" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+                    <span id="event-date-error" class="text-pink-500 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label for="event-time" class="block text-gray-300 mb-2">Time</label>
+                    <input type="time" id="event-time" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+                    <span id="event-time-error" class="text-pink-500 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label for="event-location" class="block text-gray-300 mb-2">Location</label>
+                    <input type="text" id="event-location" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter event location" required>
+                    <span id="event-location-error" class="text-pink-500 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label for="event-description" class="block text-gray-300 mb-2">Description (Optional)</label>
+                    <textarea id="event-description" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter event description" rows="4"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="event-banner-url" class="block text-gray-300 mb-2">Banner Image URL (Optional)</label>
+                    <input type="url" id="event-banner-url" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter image URL">
+                    <span id="event-banner-url-error" class="text-pink-500 text-sm mt-1"></span>
+                </div>
+                <button onclick="hostEvent()" class="w-full px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Host Event</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || !user.isLoggedIn) {
+            window.location.href = 'index.html';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-cyan-500 text-gray-900' : 'bg-pink-500 text-white'}`;
+            notification.innerHTML = `
+                <div class="loading-bar h-1 ${type === 'success' ? 'bg-gray-900' : 'bg-white'} absolute top-0 left-0"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function validateUrl(url) {
+            const urlRegex = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w- ./?%&=]*)?$/i;
+            return url === '' || urlRegex.test(url);
+        }
+
+        async function hostEvent() {
+            const name = document.getElementById('event-name').value.trim();
+            const date = document.getElementById('event-date').value;
+            const time = document.getElementById('event-time').value;
+            const location = document.getElementById('event-location').value.trim();
+            const description = document.getElementById('event-description').value.trim();
+            const bannerUrl = document.getElementById('event-banner-url').value.trim();
+
+            // Reset error messages
+            document.getElementById('event-name-error').textContent = '';
+            document.getElementById('event-date-error').textContent = '';
+            document.getElementById('event-time-error').textContent = '';
+            document.getElementById('event-location-error').textContent = '';
+            document.getElementById('event-banner-url-error').textContent = '';
+
+            // Validate required fields
+            let hasError = false;
+            if (!name) {
+                document.getElementById('event-name-error').textContent = 'Event name is required.';
+                hasError = true;
+            }
+            if (!date) {
+                document.getElementById('event-date-error').textContent = 'Event date is required.';
+                hasError = true;
+            } else {
+                const selectedDate = new Date(date);
+                const today = new Date('2025-05-13');
+                if (selectedDate < today) {
+                    document.getElementById('event-date-error').textContent = 'Event date cannot be in the past.';
+                    hasError = true;
+                }
+            }
+            if (!time) {
+                document.getElementById('event-time-error').textContent = 'Event time is required.';
+                hasError = true;
+            }
+            if (!location) {
+                document.getElementById('event-location-error').textContent = 'Event location is required.';
+                hasError = true;
+            }
+            if (bannerUrl && !validateUrl(bannerUrl)) {
+                document.getElementById('event-banner-url-error').textContent = 'Please enter a valid URL or leave it empty.';
+                hasError = true;
+            }
+
+            if (hasError) {
+                showNotification('Please fix the errors in the form.', 'error');
+                return;
+            }
+
+            // Create event object
+            const event = {
+                name,
+                date,
+                time,
+                location,
+                description,
+                bannerUrl,
+                hostEmail: user.email
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/host_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(event)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to host event.');
+                }
+
+                showNotification('Event hosted successfully!');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1000);
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

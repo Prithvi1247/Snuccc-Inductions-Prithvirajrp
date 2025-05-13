@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKIBIDI EVENT MANAGER - Registered Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1a2e, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .glow-active {
+            background: linear-gradient(90deg, #00ddeb, #00aacc);
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .event-card {
+            background: rgba(27, 38, 59, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .notification .loading-bar {
+            animation: loading 3s linear forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes loading {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <nav class="navbar fixed top-0 left-0 w-full p-4 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-cyan-400">SKIBIDI EVENT MANAGER</h1>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Home</a>
+                <a href="registered_events.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover glow-active">Registered Events</a>
+                <a href="host_event.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Host Event</a>
+                <a href="index.html" id="login-link" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Login/Signup</a>
+                <a href="#" id="logout-btn" class="text-pink-500 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover hidden" onclick="logout()">Logout</a>
+                <span id="user-info" class="text-gray-300"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-24 p-6">
+        <h2 class="text-3xl font-bold text-cyan-400 text-center mb-8">Registered Events</h2>
+        <div id="registered-events-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p id="no-registered-events" class="text-gray-400 text-center col-span-full">No registered events. Register for an event to see it here.</p>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user')) || { isLoggedIn: false };
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-cyan-500 text-gray-900' : 'bg-pink-500 text-white'}`;
+            notification.innerHTML = `
+                <div class="loading-bar h-1 ${type === 'success' ? 'bg-gray-900' : 'bg-white'} absolute top-0 left-0"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function updateNavbar() {
+            const userInfo = document.getElementById('user-info');
+            const loginLink = document.getElementById('login-link');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (user.isLoggedIn) {
+                userInfo.innerHTML = `Welcome, <span class="text-cyan-400 font-semibold">${user.name}</span>`;
+                loginLink.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userInfo.textContent = '';
+                loginLink.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                window.location.href = 'index.html';
+                return; // Stop execution to prevent further calls
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            user = { isLoggedIn: false };
+            updateNavbar();
+            showNotification('Logged out successfully!');
+        }
+
+        function getEventImage(type) {
+            const safeType = typeof type === 'string' ? type : '';
+            switch (safeType.toLowerCase()) {
+                case 'conference':
+                    return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1470&auto=format&fit=crop';
+                case 'concert':
+                    return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1470&auto=format&fit=crop';
+                case 'workshop':
+                    return 'https://images.unsplash.com/photo-1516321318423-24f50516f4d8?q=80&w=1470&auto=format&fit=crop';
+                case 'exhibition':
+                    return 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1470&auto=format&fit=crop';
+                case 'hackathon':
+                    return 'https://images.unsplash.com/photo-1516321165247-7b920bd2a8de?q=80&w=1470&auto=format&fit=crop';
+                case 'party':
+                    return 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1470&auto=format&fit=crop';
+                case 'seminar':
+                    return 'https://images.unsplash.com/photo-1505373877841-8d25f7d466b0?q=80&w=1470&auto=format&fit=crop';
+                default:
+                    return 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1469&auto=format&fit=crop';
+            }
+        }
+
+        async function fetchRegisteredEvents() {
+            const container = document.getElementById('registered-events-container');
+            const noEventsMessage = document.getElementById('no-registered-events');
+
+            if (!user.isLoggedIn) {
+                container.innerHTML = '<p id="no-registered-events" class="text-gray-400 text-center col-span-full">No registered events. Register for an event to see it here.</p>';
+                return;
+            }
+
+            try {
+                // Fetch registered event names
+                const response = await fetch(`http://localhost:5000/user_events?email=${encodeURIComponent(user.email)}`);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to fetch registered events.');
+                }
+
+                const registeredEventNames = result.registered_events;
+                container.innerHTML = ''; // Clear the container
+
+                if (registeredEventNames.length === 0) {
+                    container.innerHTML = '<p id="no-registered-events" class="text-gray-400 text-center col-span-full">No registered events. Register for an event to see it here.</p>';
+                    return;
+                }
+
+                // Fetch all events to get full details
+                const eventsResponse = await fetch('http://localhost:5000/get_events');
+                const allEvents = await eventsResponse.json();
+
+                if (!eventsResponse.ok) {
+                    throw new Error(allEvents.error || 'Failed to fetch events.');
+                }
+
+                // Filter events to only include registered ones
+                const registeredEvents = allEvents.filter(event => registeredEventNames.includes(event.name));
+
+                registeredEvents.forEach(event => {
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card p-6 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300';
+                    eventCard.innerHTML = `
+                        <img src="${event.bannerUrl || getEventImage(event.type || '')}" alt="${event.name || 'Unnamed Event'}" class="w-full h-40 object-cover rounded-lg mb-4" onerror="this.src='https://picsum.photos/300/200?random=fallback';">
+                        <h3 class="text-xl font-semibold text-cyan-400">${event.name || 'Unnamed Event'}</h3>
+                        <p class="text-gray-300"><strong>Location:</strong> ${event.location || 'N/A'}</p>
+                        <p class="text-gray-300"><strong>Date:</strong> ${event.date || 'N/A'}</p>
+                        <p class="text-gray-300"><strong>Time:</strong> ${event.time || 'N/A'}</p>
+                        ${event.type ? `<p class="text-gray-300"><strong>Type:</strong> ${event.type}</p>` : ''}
+                        <p class="text-gray-400 mt-2">${event.description || 'No description available.'}</p>
+                        ${event.hostEmail ? `<p class="text-gray-300"><strong>Hosted by:</strong> ${event.hostEmail}</p>` : ''}
+                        <button class="inline-block mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400 transition-all duration-300" onclick="removeEvent('${event.name || 'Unnamed Event'}')">Remove</button>
+                    `;
+                    container.appendChild(eventCard);
+                });
+            } catch (error) {
+                showNotification(error.message, 'error');
+                container.innerHTML = '<p id="no-registered-events" class="text-gray-400 text-center col-span-full">Failed to load events. Please try again.</p>';
+            }
+        }
+
+        async function removeEvent(eventName) {
+            try {
+                const response = await fetch('http://localhost:5000/remove_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: user.email,
+                        event_name: eventName
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to remove event.');
+                }
+
+                showNotification(result.message);
+                fetchRegisteredEvents(); // Refresh the list after removal
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        updateNavbar();
+        fetchRegisteredEvents();
+    </script>
+</body>
+</html>

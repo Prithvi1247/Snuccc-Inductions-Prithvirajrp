@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKIBIDI EVENT MANAGER - Login/Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1a2e, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .glow-active {
+            background: linear-gradient(90deg, #00ddeb, #00aacc);
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .form-card {
+            background: rgba(27, 38, 59, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .notification .loading-bar {
+            animation: loading 3s linear forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes loading {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <nav class="navbar fixed top-0 left-0 w-full p-4 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-cyan-400">SKIBIDI EVENT MANAGER</h1>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Home</a>
+                <a href="registered_events.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Registered Events</a>
+                <a href="index.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover glow-active">Login/Signup</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-24 p-6">
+        <h2 class="text-3xl font-bold text-cyan-400 text-center mb-8">Login / Signup</h2>
+        <div class="form-card max-w-md mx-auto p-6 rounded-xl shadow-lg transition-all duration-300">
+            <!-- Signup Form -->
+            <div id="signup-form">
+                <!-- Basic Details Section -->
+                <div id="basic-details-section">
+                    <div class="mb-4">
+                        <label for="signup-name" class="block text-gray-300 mb-2">Name</label>
+                        <input type="text" id="signup-name" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter your name" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="signup-email" class="block text-gray-300 mb-2">Email</label>
+                        <input type="email" id="signup-email" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter your email" required>
+                        <span id="signup-email-error" class="text-pink-500 text-sm mt-1"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label for="signup-phone" class="block text-gray-300 mb-2">Phone</label>
+                        <input type="tel" id="signup-phone" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter your phone number" required>
+                    </div>
+                    <button onclick="proceedToIceCream()" class="w-full px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Next</button>
+                </div>
+
+                <!-- Ice Cream Selection Section -->
+                <div id="icecream-section" class="hidden">
+                    <h3 class="text-xl font-semibold text-cyan-400 mb-4 text-center">Select Your Favorite Ice Cream Flavor</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center cursor-pointer p-2" onclick="selectIcecream('chocolate', event)">
+                            <img src="https://picsum.photos/150/150?random=1" alt="Chocolate Ice Cream" class="w-full h-24 object-cover rounded-lg mb-2 border-2 border-transparent transition" onerror="this.src='https://picsum.photos/150/150?random=fallback';">
+                            <p class="text-gray-300">Chocolate</p>
+                        </div>
+                        <div class="text-center cursor-pointer p-2" onclick="selectIcecream('vanilla', event)">
+                            <img src="https://picsum.photos/150/150?random=2" alt="Vanilla Ice Cream" class="w-full h-24 object-cover rounded-lg mb-2 border-2 border-transparent transition" onerror="this.src='https://picsum.photos/150/150?random=fallback';">
+                            <p class="text-gray-300">Vanilla</p>
+                        </div>
+                        <div class="text-center cursor-pointer p-2" onclick="selectIcecream('strawberry', event)">
+                            <img src="https://picsum.photos/150/150?random=3" alt="Strawberry Ice Cream" class="w-full h-24 object-cover rounded-lg mb-2 border-2 border-transparent transition" onerror="this.src='https://picsum.photos/150/150?random=fallback';">
+                            <p class="text-gray-300">Strawberry</p>
+                        </div>
+                        <div class="text-center cursor-pointer p-2" onclick="selectIcecream('mint', event)">
+                            <img src="https://picsum.photos/150/150?random=4" alt="Mint Ice Cream" class="w-full h-24 object-cover rounded-lg mb-2 border-2 border-transparent transition" onerror="this.src='https://picsum.photos/150/150?random=fallback';">
+                            <p class="text-gray-300">Mint</p>
+                        </div>
+                    </div>
+                    <button onclick="proceedToBirthday()" class="w-full px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300 mt-4">Next</button>
+                </div>
+
+                <!-- Birthday Section -->
+                <div id="birthday-section" class="hidden">
+                    <div class="mb-4">
+                        <label for="signup-birthday" class="block text-gray-300 mb-2">Birthday (DDMMYYYY)</label>
+                        <input type="text" id="signup-birthday" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="e.g., 01012000" required>
+                        <span id="signup-birthday-error" class="text-pink-500 text-sm mt-1"></span>
+                    </div>
+                    <button onclick="generateUniqueId()" class="w-full px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Complete Signup</button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="hidden">
+                <!-- Login Email Section -->
+                <div id="login-email-section">
+                    <div class="mb-4">
+                        <label for="login-email" class="block text-gray-300 mb-2">Email</label>
+                        <input type="email" id="login-email" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter your email" required>
+                        <span id="login-email-error" class="text-pink-500 text-sm mt-1"></span>
+                    </div>
+                    <button onclick="proceedToUniqueIdLogin()" class="w-full px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Next</button>
+                </div>
+
+                <!-- Login Unique ID Section -->
+                <div id="login-uniqueid-section" class="hidden">
+                    <div class="mb-4">
+                        <label for="login-uniqueid" class="block text-gray-300 mb-2">Unique ID</label>
+                        <input type="text" id="login-uniqueid" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter your unique ID (e.g., chocolate-01012000)" required>
+                        <span id="login-uniqueid-error" class="text-pink-500 text-sm mt-1"></span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="toggleVisibility('login-uniqueid-section', 'login-email-section')" class="w-1/2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all duration-300">Back</button>
+                        <button onclick="login()" class="w-1/2 px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Login</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="toggle-form-btn" class="block w-full text-center mt-4 px-4 py-2 text-gray-300 rounded-full transition-all duration-300 glow-on-hover">Already Registered? Log In</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedIcecream = '';
+        let signupData = {};
+
+        function toggleVisibility(hideId, showId) {
+            document.getElementById(hideId).classList.add('hidden');
+            document.getElementById(showId).classList.remove('hidden');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-cyan-500 text-gray-900' : 'bg-pink-500 text-white'}`;
+            notification.innerHTML = `
+                <div class="loading-bar h-1 ${type === 'success' ? 'bg-gray-900' : 'bg-white'} absolute top-0 left-0"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function proceedToIceCream() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const phone = document.getElementById('signup-phone').value;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!name || !email || !phone) {
+                document.getElementById('signup-email-error').textContent = 'Please fill in all fields.';
+                return;
+            }
+            if (!emailRegex.test(email)) {
+                document.getElementById('signup-email-error').textContent = 'Please enter a valid email address.';
+                return;
+            }
+
+            signupData = { name, email, phone };
+            toggleVisibility('basic-details-section', 'icecream-section');
+            document.getElementById('signup-email-error').textContent = '';
+        }
+
+        function selectIcecream(flavor, event) {
+            selectedIcecream = flavor;
+            document.querySelectorAll('.text-center').forEach(option => {
+                option.classList.remove('bg-cyan-500/10');
+                const img = option.querySelector('img');
+                if (img) {
+                    img.classList.remove('border-cyan-500');
+                }
+            });
+            const target = event.currentTarget;
+            target.classList.add('bg-cyan-500/10');
+            const targetImg = target.querySelector('img');
+            if (targetImg) {
+                targetImg.classList.add('border-cyan-500');
+            }
+        }
+
+        function proceedToBirthday() {
+            if (!selectedIcecream) {
+                showNotification('Please select an ice cream flavor.', 'error');
+                return;
+            }
+            toggleVisibility('icecream-section', 'birthday-section');
+        }
+
+        async function generateUniqueId() {
+            const birthday = document.getElementById('signup-birthday').value;
+            if (!selectedIcecream || !birthday || birthday.length !== 8 || isNaN(birthday)) {
+                document.getElementById('signup-birthday-error').textContent = 'Please select an ice cream flavor and enter a valid birthday (DDMMYYYY).';
+                return;
+            }
+
+            const uniqueId = `${selectedIcecream}-${birthday}`;
+            const user = {
+                name: signupData.name,
+                email: signupData.email,
+                phone: signupData.phone,
+                uniqueId: uniqueId
+            };
+
+            try {
+                if (checkDuplicateEmail(user.email)) {
+                    throw new Error('This email is already registered. Please use a different email or login.');
+                }
+
+                const response = await fetch('http://localhost:5000/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to sign up.');
+                }
+
+                addToLocalStorage(user);
+
+                showNotification(`Signup successful! Your unique ID is: ${uniqueId}`);
+                showForm('login');
+                resetSignupForm();
+            } catch (error) {
+                document.getElementById('signup-birthday-error').textContent = error.message;
+                showNotification(error.message, 'error');
+            }
+        }
+
+        function checkDuplicateEmail(email) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            return users.some(user => user.email === email);
+        }
+
+        function addToLocalStorage(user) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('user', JSON.stringify({ isLoggedIn: true, ...user }));
+        }
+
+        function resetSignupForm() {
+            document.getElementById('signup-name').value = '';
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-phone').value = '';
+            document.getElementById('signup-birthday').value = '';
+            document.getElementById('signup-email-error').textContent = '';
+            document.getElementById('signup-birthday-error').textContent = '';
+            selectedIcecream = '';
+            signupData = {};
+            document.querySelectorAll('.text-center').forEach(option => {
+                option.classList.remove('bg-cyan-500/10');
+                const img = option.querySelector('img');
+                if (img) {
+                    img.classList.remove('border-cyan-500');
+                }
+            });
+            toggleVisibility('birthday-section', 'basic-details-section');
+        }
+
+        function resetLoginForm() {
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-uniqueid').value = '';
+            document.getElementById('login-email-error').textContent = '';
+            document.getElementById('login-uniqueid-error').textContent = '';
+            toggleVisibility('login-uniqueid-section', 'login-email-section');
+        }
+
+        function proceedToUniqueIdLogin() {
+            const email = document.getElementById('login-email').value;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                document.getElementById('login-email-error').textContent = 'Please fill in the email field.';
+                return;
+            }
+            if (!emailRegex.test(email)) {
+                document.getElementById('login-email-error').textContent = 'Please enter a valid email address.';
+                return;
+            }
+
+            toggleVisibility('login-email-section', 'login-uniqueid-section');
+            document.getElementById('login-email-error').textContent = '';
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const uniqueId = document.getElementById('login-uniqueid').value;
+
+            const uniqueIdRegex = /^(chocolate|vanilla|strawberry|mint)-[0-9]{8}$/;
+            if (!uniqueId) {
+                document.getElementById('login-uniqueid-error').textContent = 'Please enter your unique ID.';
+                return;
+            }
+            if (!uniqueIdRegex.test(uniqueId)) {
+                document.getElementById('login-uniqueid-error').textContent = 'Unique ID must be in the format: icecream-DDMMYYYY (e.g., chocolate-01012000).';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, uniqueId })
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to login.');
+                }
+
+                localStorage.setItem('user', JSON.stringify({ isLoggedIn: true, ...result.user }));
+                showNotification('Login successful!');
+                setTimeout(() => {
+                    try {
+                        window.location.href = 'home.html';
+                    } catch (error) {
+                        showNotification('Redirect failed. Please navigate to the home page manually.', 'error');
+                    }
+                }, 1000);
+            } catch (error) {
+                document.getElementById('login-uniqueid-error').textContent = error.message;
+                showNotification(error.message, 'error');
+                resetLoginForm();
+            }
+        }
+
+        function showForm(formType) {
+            const signupForm = document.getElementById('signup-form');
+            const loginForm = document.getElementById('login-form');
+            const toggleBtn = document.getElementById('toggle-form-btn');
+
+            if (formType === 'login') {
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                toggleBtn.textContent = 'New User? Sign Up';
+                toggleBtn.onclick = () => showForm('signup'); // Update onclick to switch to signup
+                resetLoginForm();
+            } else {
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                toggleBtn.textContent = 'Already Registered? Log In';
+                toggleBtn.onclick = () => showForm('login'); // Update onclick to switch to login
+                resetSignupForm();
+            }
+        }
+
+        // Initialize the toggle button's onclick handler
+        document.getElementById('toggle-form-btn').onclick = () => showForm('login');
+    </script>
+</body>
+</html>

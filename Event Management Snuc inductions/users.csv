@@ -1,0 +1,6 @@
+name,email,phone,uniqueId,registered_events
+test,t@gmail.com,9876543211,vanilla-11111111,"[{""event_name"": ""Akshays Singing event"", ""lunch_preference"": {""main_preference"": ""Non-Vegan"", ""additional_info"": ""lactose intolerant""}}]"
+p,p@gmail.com,987654321,chocolate-11111111,"[{""event_name"": ""Neon Dance Party"", ""lunch_preference"": {""main_preference"": ""Non-Vegan"", ""additional_info"": """"}}, {""event_name"": ""Akshays Singing event"", ""lunch_preference"": {""main_preference"": ""Non-Vegan"", ""additional_info"": """"}}]"
+test,t2@gmail.com,2134234234,chocolate-11111111,[]
+akshay,a@gmail.com,1231231231,vanilla-11223333,"[""Tech Summit 2025""]"
+abcd,as@gmail.com,9876543211,chocolate-11111111,"[{""event_name"": ""Akshays Singing event"", ""lunch_preference"": {""main_preference"": ""Vegan"", ""additional_info"": ""i hate broccolli""}}]"

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKIBIDI EVENT MANAGER - Host Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1a2e, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .glow-active {
+            background: linear-gradient(90deg, #00ddeb, #00aacc);
+            box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+        }
+        .event-card, .registrations-card, .stats-card {
+            background: rgba(27, 38, 59, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .notification {
+            animation: slideIn 0.5s ease forwards;
+        }
+        .notification .loading-bar {
+            animation: loading 3s linear forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes loading {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+        .overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <nav class="navbar fixed top-0 left-0 w-full p-4 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-cyan-400">SKIBIDI EVENT MANAGER</h1>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Home</a>
+                <a href="registered_events.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Registered Events</a>
+                <a href="host_event.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Host Event</a>
+                <a href="host_dashboard.html" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover glow-active">Host Dashboard</a>
+                <a href="index.html" id="login-link" class="text-gray-300 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover">Login/Signup</a>
+                <a href="#" id="logout-btn" class="text-pink-500 px-4 py-2 rounded-full transition-all duration-300 glow-on-hover hidden" onclick="logout()">Logout</a>
+                <span id="user-info" class="text-gray-300"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-24 p-6">
+        <h2 class="text-3xl font-bold text-cyan-400 text-center mb-8">Host Dashboard</h2>
+
+        <!-- Quick Stats -->
+        <div id="quick-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="stats-card p-4 rounded-xl shadow-lg text-center">
+                <h3 class="text-lg font-semibold text-cyan-400">Total Hosted Events</h3>
+                <p id="total-events" class="text-2xl text-gray-300">0</p>
+            </div>
+            <div class="stats-card p-4 rounded-xl shadow-lg text-center">
+                <h3 class="text-lg font-semibold text-cyan-400">Total Registrations</h3>
+                <p id="total-registrations" class="text-2xl text-gray-300">0</p>
+            </div>
+            <div class="stats-card p-4 rounded-xl shadow-lg text-center">
+                <h3 class="text-lg font-semibold text-cyan-400">Most Popular Event</h3>
+                <p id="most-popular-event" class="text-lg text-gray-300">None</p>
+            </div>
+        </div>
+
+        <!-- Hosted Events -->
+        <div id="hosted-events-container" class="space-y-6">
+            <p id="no-hosted-events" class="text-gray-400 text-center">You have not hosted any events yet. Host an event to see it here.</p>
+        </div>
+    </div>
+
+    <!-- Overlay for Pie Chart -->
+    <div id="chart-overlay" class="overlay fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg max-w-md w-full">
+            <h3 class="text-xl font-semibold text-cyan-400 text-center mb-4" id="chart-overlay-title"></h3>
+            <canvas id="overlay-pie-chart" class="max-w-xs mx-auto"></canvas>
+            <button class="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400 transition-all duration-300 w-full" onclick="closeChartOverlay()">Close</button>
+            <button class="mt-2 px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300 w-full" onclick="goToDashboard()">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user')) || { isLoggedIn: false };
+        let allHostedEvents = [];
+        let allRegistrations = {};
+        let currentChart = null;
+
+        // Debug: Check if Chart.js is loaded
+        console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-cyan-500 text-gray-900' : 'bg-pink-500 text-white'}`;
+            notification.innerHTML = `
+                <div class="loading-bar h-1 ${type === 'success' ? 'bg-gray-900' : 'bg-white'} absolute top-0 left-0"></div>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function updateNavbar() {
+            const userInfo = document.getElementById('user-info');
+            const loginLink = document.getElementById('login-link');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (user.isLoggedIn) {
+                userInfo.innerHTML = `Welcome, <span class="text-cyan-400 font-semibold">${user.name}</span>`;
+                loginLink.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userInfo.textContent = '';
+                loginLink.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                window.location.href = 'index.html';
+                return;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            user = { isLoggedIn: false };
+            updateNavbar();
+            showNotification('Logged out successfully!');
+        }
+
+        function getEventStatus(eventDate) {
+            const today = new Date('2025-05-13T23:32:00+05:30'); // Current date and time: 11:32 PM IST
+            const eventDateObj = new Date(eventDate);
+            if (eventDateObj < today) {
+                return { text: 'Past', color: 'text-red-400' };
+            } else if (eventDateObj.toDateString() === today.toDateString()) {
+                return { text: 'Today', color: 'text-yellow-400' };
+            } else {
+                return { text: 'Upcoming', color: 'text-green-400' };
+            }
+        }
+
+        function createPieChart(canvasId, veganCount, nonVeganCount) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Vegan', 'Non-Vegan'],
+                    datasets: [{
+                        data: [veganCount, nonVeganCount],
+                        backgroundColor: ['#34D399', '#F87171'],
+                        borderColor: ['#1F2937', '#1F2937'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#D1D5DB'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Lunch Preferences Distribution',
+                            color: '#22D3EE',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showChartOverlay(eventName, veganCount, nonVeganCount) {
+            const overlay = document.getElementById('chart-overlay');
+            const overlayTitle = document.getElementById('chart-overlay-title');
+            const canvas = document.getElementById('overlay-pie-chart');
+
+            // Destroy previous chart if exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // Set overlay title
+            overlayTitle.textContent = `Lunch Preferences for ${eventName}`;
+
+            // Show overlay
+            overlay.classList.remove('hidden');
+
+            // Debug data
+            console.log(`Overlay Pie Chart Data for ${eventName}: Vegan=${veganCount}, Non-Vegan=${nonVeganCount}`);
+
+            // Create pie chart in overlay
+            if (veganCount === 0 && nonVeganCount === 0) {
+                canvas.parentElement.innerHTML = '<p class="text-gray-400 text-center">No lunch preferences specified.</p>';
+            } else {
+                // Ensure canvas is reset
+                canvas.parentElement.innerHTML = '<canvas id="overlay-pie-chart" class="max-w-xs mx-auto"></canvas>';
+                currentChart = createPieChart('overlay-pie-chart', veganCount, nonVeganCount);
+            }
+        }
+
+        function closeChartOverlay() {
+            const overlay = document.getElementById('chart-overlay');
+            overlay.classList.add('hidden');
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+        }
+
+        function goToDashboard() {
+            // Destroy the chart to prevent memory leaks
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+            // Redirect to host_dashboard.html
+            window.location.href = 'host_dashboard.html';
+        }
+
+        function exportToCSV(eventName, users) {
+            const headers = ['Name', 'Email', 'Phone', 'Lunch Preference', 'Additional Info'];
+            const rows = users.map(user => [
+                user.name,
+                user.email,
+                user.phone,
+                user.lunch_preference.main_preference || '',
+                user.lunch_preference.additional_info || ''
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${eventName}_registrations.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function fetchHostedEvents() {
+            const container = document.getElementById('hosted-events-container');
+            const noEventsMessage = document.getElementById('no-hosted-events');
+
+            if (!user.isLoggedIn) {
+                container.innerHTML = '<p id="no-hosted-events" class="text-gray-400 text-center">Please log in to view your hosted events.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/get_hosted_events?email=${encodeURIComponent(user.email)}`);
+                const hostedEvents = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(hostedEvents.error || 'Failed to fetch hosted events.');
+                }
+
+                allHostedEvents = hostedEvents;
+                container.innerHTML = '';
+
+                if (hostedEvents.length === 0) {
+                    container.innerHTML = '<p id="no-hosted-events" class="text-gray-400 text-center">You have not hosted any events yet. Host an event to see it here.</p>';
+                    document.getElementById('total-events').textContent = '0';
+                    document.getElementById('total-registrations').textContent = '0';
+                    document.getElementById('most-popular-event').textContent = 'None';
+                    return;
+                }
+
+                let totalRegistrations = 0;
+                let mostPopularEvent = { name: 'None', count: 0 };
+
+                for (const event of hostedEvents) {
+                    const regResponse = await fetch(`http://localhost:5000/get_event_registrations?event_name=${encodeURIComponent(event.name)}`);
+                    const registeredUsers = await regResponse.json();
+                    allRegistrations[event.name] = registeredUsers;
+                    const regCount = registeredUsers.length;
+                    totalRegistrations += regCount;
+                    if (regCount > mostPopularEvent.count) {
+                        mostPopularEvent = { name: event.name, count: regCount };
+                    }
+                }
+
+                // Update Quick Stats
+                document.getElementById('total-events').textContent = hostedEvents.length;
+                document.getElementById('total-registrations').textContent = totalRegistrations;
+                document.getElementById('most-popular-event').textContent = mostPopularEvent.name;
+
+                // Display Events
+                hostedEvents.forEach(event => {
+                    const status = getEventStatus(event.date);
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card p-6 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300';
+                    eventCard.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-cyan-400">${event.name || 'Unnamed Event'}</h3>
+                            <span class="${status.color} text-sm">${status.text}</span>
+                        </div>
+                        <p class="text-gray-300"><strong>Location:</strong> ${event.location || 'N/A'}</p>
+                        <p class="text-gray-300"><strong>Date:</strong> ${event.date || 'N/A'}</p>
+                        <p class="text-gray-300"><strong>Time:</strong> ${event.time || 'N/A'}</p>
+                        ${event.type ? `<p class="text-gray-300"><strong>Type:</strong> ${event.type}</p>` : ''}
+                        <p class="text-gray-400 mt-2">${event.description || 'No description available.'}</p>
+                        <button class="inline-block mt-4 px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300" onclick="toggleRegistrations('${event.name || 'Unnamed Event'}', this)">Show Registrations</button>
+                        <div id="registrations-${event.name.replace(/[^a-zA-Z0-9]/g, '-')}" class="registrations-card mt-4 p-4 rounded-lg hidden"></div>
+                    `;
+                    container.appendChild(eventCard);
+                });
+            } catch (error) {
+                showNotification(error.message, 'error');
+                container.innerHTML = '<p id="no-hosted-events" class="text-gray-400 text-center">Failed to load hosted events. Please try again.</p>';
+            }
+        }
+
+        async function toggleRegistrations(eventName, button) {
+            const registrationsContainer = document.getElementById(`registrations-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}`);
+            const isHidden = registrationsContainer.classList.contains('hidden');
+
+            if (isHidden) {
+                try {
+                    const registeredUsers = allRegistrations[eventName];
+                    console.log(`Registered Users for ${eventName}:`, registeredUsers); // Debug
+
+                    registrationsContainer.innerHTML = `
+                        <div class="mb-4">
+                            <p class="text-gray-300 mb-2"><strong>Total Registrations:</strong> ${registeredUsers.length}</p>
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <label for="preference-filter-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}" class="text-gray-300 mr-2">Filter by Preference:</label>
+                                    <select id="preference-filter-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}" class="bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                                        <option value="all">All</option>
+                                        <option value="Vegan">Vegan</option>
+                                        <option value="Non-Vegan">Non-Vegan</option>
+                                    </select>
+                                </div>
+                                <button id="export-csv-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}" class="px-4 py-2 bg-green-500 text-gray-900 rounded-lg hover:bg-green-400 transition-all duration-300">Export as CSV</button>
+                            </div>
+                            <button id="show-chart-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}" class="px-4 py-2 bg-cyan-500 text-gray-900 rounded-lg hover:bg-cyan-400 transition-all duration-300">Show Lunch Preferences Chart</button>
+                        </div>
+                        <ul id="user-list-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}" class="space-y-2"></ul>
+                    `;
+
+                    if (registeredUsers.length === 0) {
+                        registrationsContainer.innerHTML = '<p class="text-gray-400">No users have registered for this event.</p>';
+                        return; // Exit early if no users
+                    }
+
+                    // Calculate Vegan/Non-Vegan distribution
+                    let veganCount = 0;
+                    let nonVeganCount = 0;
+                    registeredUsers.forEach(user => {
+                        const preference = user.lunch_preference && user.lunch_preference.main_preference ? user.lunch_preference.main_preference : '';
+                        if (preference === 'Vegan') veganCount++;
+                        else if (preference === 'Non-Vegan') nonVeganCount++;
+                    });
+
+                    console.log(`Pie Chart Data for ${eventName}: Vegan=${veganCount}, Non-Vegan=${nonVeganCount}`); // Debug
+
+                    // Add event listener for the chart button
+                    document.getElementById(`show-chart-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}`).addEventListener('click', () => {
+                        showChartOverlay(eventName, veganCount, nonVeganCount);
+                    });
+
+                    // Display Users
+                    const userList = document.getElementById(`user-list-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}`);
+                    function renderUsers(filter = 'all') {
+                        userList.innerHTML = '';
+                        const filteredUsers = filter === 'all' ? registeredUsers : registeredUsers.filter(user => user.lunch_preference.main_preference === filter);
+                        filteredUsers.forEach(user => {
+                            const userItem = document.createElement('li');
+                            userItem.className = 'text-gray-300';
+                            let lunchPreferenceText = '';
+                            const lunchPreference = user.lunch_preference && typeof user.lunch_preference === 'object' ? user.lunch_preference : { main_preference: '', additional_info: '' };
+                            if (lunchPreference.main_preference) {
+                                lunchPreferenceText += ` - <span class="text-cyan-400">Lunch Preference:</span> ${lunchPreference.main_preference}`;
+                            }
+                            if (lunchPreference.additional_info) {
+                                lunchPreferenceText += `${lunchPreference.main_preference ? ',' : ' -'} <span class="text-cyan-400">Additional Info:</span> ${lunchPreference.additional_info}`;
+                            }
+                            userItem.innerHTML = `<strong>${user.name}</strong> (${user.email}, ${user.phone})${lunchPreferenceText}`;
+                            userList.appendChild(userItem);
+                        });
+                    }
+
+                    renderUsers();
+
+                    // Filter Event Listener
+                    document.getElementById(`preference-filter-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}`).addEventListener('change', (e) => {
+                        renderUsers(e.target.value);
+                    });
+
+                    // Export CSV Event Listener
+                    document.getElementById(`export-csv-${eventName.replace(/[^a-zA-Z0-9]/g, '-')}`).addEventListener('click', () => {
+                        exportToCSV(eventName, registeredUsers);
+                    });
+
+                    registrationsContainer.classList.remove('hidden');
+                    button.textContent = 'Hide Registrations';
+                } catch (error) {
+                    showNotification(error.message, 'error');
+                    registrationsContainer.innerHTML = '<p class="text-gray-400">Failed to load registrations.</p>';
+                    registrationsContainer.classList.remove('hidden');
+                }
+            } else {
+                registrationsContainer.classList.add('hidden');
+                button.textContent = 'Show Registrations';
+            }
+        }
+
+        updateNavbar();
+        fetchHostedEvents();
+    </script>
+</body>
+</html>
