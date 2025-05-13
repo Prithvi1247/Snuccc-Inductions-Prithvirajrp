@@ -9,7 +9,7 @@ To test out this project login with the email as a@gmail.com and password as "va
 
 Skibidi Event Manager
 
-# Prerequisites
+## Prerequisites
 Before running the project, ensure you have the following installed:
 
 Python 3.8+: For running the Flask backend server.
@@ -17,14 +17,14 @@ pip: To install Python dependencies.
 Node.js (optional): Only if you need to serve the frontend independently.
 A modern web browser: Chrome, Firefox, or Edge recommended.
 
-# Installation
+## Installation
 
 Clone the Repository:
 git clone https://github.com/your-username/skibidi-event-manager.git
 cd skibidi-event-manager
 
 
-# Set Up the Backend:
+## Set Up the Backend:
 
 Install the required Python packages:pip install flask pandas
 
@@ -33,13 +33,13 @@ Ensure app.py (the Flask server) is in the project root.
 
 
 
-# Prepare the Frontend:
+## Prepare the Frontend:
 
 The frontend consists of HTML files (index.html, home.html, host_dashboard.html, etc.).
 No additional setup is required as it uses CDN-hosted libraries (Tailwind CSS, Chart.js).
 
 
-# Start the Backend Server:
+## Start the Backend Server:
 
 Run the Flask server to handle API requests:python app.py
 
@@ -47,14 +47,14 @@ Run the Flask server to handle API requests:python app.py
 The server will start on http://localhost:5000.
 
 
-# Serve the Frontend:
+## Serve the Frontend:
 
 Use a local server to serve the HTML files:python -m http.server 8000
 
 
 Access the app at http://localhost:8000.
 
-# Overview
+## Overview
 Skibidi Event Manager is a web-based application designed to streamline event hosting and participation. It allows users to create, manage, and register for events, with features tailored for both event hosts and attendees. The app features a futuristic dark-themed interface with interactive elements, making event management both efficient and engaging.
 This project was developed as a submission for a judging panel, showcasing our skills in web development, data visualization, and user experience design.
 Features
@@ -75,7 +75,7 @@ Interactive UI: Features a dark gradient theme, Orbitron font, glowing hover eff
 
 
 
-# Usage
+## Usage
 
 Access the App:
 
